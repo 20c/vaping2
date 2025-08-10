@@ -7,6 +7,14 @@ import vaping
 from vaping.io import subprocess
 from vaping.plugins import TimedProbeSchema
 
+# Import Rust fping implementation
+try:
+    import vaping_fping
+
+    RUST_FPING_AVAILABLE = True
+except ImportError:
+    RUST_FPING_AVAILABLE = False
+
 
 class FPingSchema(TimedProbeSchema):
     """
@@ -23,6 +31,10 @@ class FPingSchema(TimedProbeSchema):
         help="Time in milliseconds that fping waits between successive packets to an individual target",
     )
     command = confu.schema.Str(default="fping", help="Command to run")
+    use_rust = confu.schema.Bool(
+        default=True,
+        help="Use Rust implementation if available, fallback to system fping",
+    )
 
 
 class FPingBase(vaping.plugins.TimedProbe):
@@ -50,11 +62,19 @@ class FPingBase(vaping.plugins.TimedProbe):
     def __init__(self, config, ctx):
         super().__init__(config, ctx)
 
-        if not which(self.config["command"]):
+        # Determine which implementation to use
+        self.use_rust = self.config.get("use_rust", True) and RUST_FPING_AVAILABLE
+
+        if not self.use_rust and not which(self.config["command"]):
             self.log.critical(
                 "missing fping, install it or set `command` in the fping config"
             )
             raise RuntimeError("fping command not found - install the fping package")
+
+        if self.use_rust:
+            self.log.info("Using Rust fping implementation")
+        else:
+            self.log.info(f"Using system fping command: {self.config['command']}")
 
         self.count = self.config.get("count")
         self.period = self.config.get("period")
@@ -136,6 +156,27 @@ class FPingBase(vaping.plugins.TimedProbe):
             logging.error(f"failed to get data: {e}")
 
     def _run_proc(self):
+        if self.use_rust:
+            return self._run_rust_fping()
+        else:
+            return self._run_system_fping()
+
+    def _run_rust_fping(self):
+        """Run Rust fping implementation"""
+        hosts = self.hosts_args()
+        if not hosts:
+            return []
+
+        try:
+            results = vaping_fping.ping_hosts(hosts, self.count, self.period)
+            # Filter out None results and ensure proper format
+            return [result for result in results if result is not None]
+        except Exception as e:
+            logging.error(f"Rust fping failed: {e}")
+            return []
+
+    def _run_system_fping(self):
+        """Run system fping command"""
         args = [
             self.config["command"],
             "-u",

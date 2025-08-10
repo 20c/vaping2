@@ -39,6 +39,7 @@ docutils = "<=0.21"
 munge = { extras = ["tomlkit", "yaml"], version = ">=1.2.0" }
 confu = ">=1.7.1"
 
+
 # plugins
 
 # graphite
@@ -97,6 +98,9 @@ standalone = ["graphsrv", "vodka"]
 whisper = ["whisper"]
 zeromq = ["pyzmq"]
 
+# rust fping implementation
+rust-fping = ["vaping-fping"]
+
 # all extras
 all = [
     "graphsrv",
@@ -107,6 +111,7 @@ all = [
     "requests",
     "vodka",
     "whisper",
+    "vaping-fping",
 ]
 
 [build-system]
