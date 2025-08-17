@@ -6,6 +6,7 @@ import munge.click
 
 import vaping
 import vaping.daemon
+from vaping.fping_cli import fping_cli
 
 
 class Context(munge.click.Context):
@@ -106,3 +107,7 @@ def restart(ctx, **kwargs):
     daemon = mk_daemon(ctx)
     daemon.stop()
     daemon.start()
+
+
+# Add fping subcommand
+cli.add_command(fping_cli, name="fping")

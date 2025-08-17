@@ -67,10 +67,29 @@ Options:
   --help       Show this message and exit.
 
 Commands:
+  fping    fast ping multiple hosts using Rust implementation
   start    start a vaping process
   stop     stop a vaping process
   restart  restart a vaping process
 ```
+
+### fping
+
+Provides a drop-in replacement for the traditional `fping` utility using vaping's high-performance Rust implementation. Supports all major `fping` options for compatibility.
+
+**Examples:**
+```sh
+# Basic host checking
+vaping fping 8.8.8.8 1.1.1.1
+
+# Count mode with statistics
+vaping fping -c 5 google.com
+
+# Read hosts from file
+vaping fping -f hosts.txt
+```
+
+Requires the Rust implementation: `pip install vaping[rust-fping]`
 
 ### start
 
@@ -82,7 +101,6 @@ It adds options:
 ```
   -d, --no-fork  do not fork into background
 ```
-
 
 ### stop
 
