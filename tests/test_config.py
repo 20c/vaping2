@@ -3,6 +3,7 @@ import os
 import pytest
 
 import vaping
+import vaping.daemon
 from vaping import plugin
 from vaping.config import parse_interval
 

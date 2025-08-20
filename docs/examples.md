@@ -107,3 +107,50 @@ vaping start --home=examples/mtr --debug
                   1.1.1.1:
                     name: Cloudflare
                     color: mediumpurple
+
+## Rust FPing
+
+This example shows how to use the optional Rust fping implementation for better performance.
+
+!!! Tip "Requires Rust toolchain"
+    You need to build the Rust extension first:
+
+    ```
+    ./build_rust.sh
+    ```
+
+    If you don't have the Rust extension built, vaping will automatically fall back to the system `fping` command.
+
+`examples/rust_fping/config.yml`:
+```yml
+probes:
+  - name: latency
+    type: std_fping
+    output:
+      - vodka
+
+    groups:
+      - name: public_dns
+        hosts:
+          - host: 8.8.8.8
+            name: Google
+            color: red
+          - host: 1.1.1.1
+            name: Cloudflare
+            color: blue
+
+plugins:
+  - name: std_fping
+    type: fping
+    count: 10
+    interval: 3s
+    use_rust: true  # Use Rust implementation (default: true)
+
+  - name: vodka
+    type: vodka
+    # ... rest of vodka config
+```
+
+```sh
+vaping start --home=examples/rust_fping --debug
+```
